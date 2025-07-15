@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import getDataUri from "../utils/dataUri.js";
 import cloudinary from "../utils/cloudinary.util.js";
+import { Post } from "../models/post.model.js";
 
 //registration of the user
 export const register = async (req, res) => {
@@ -76,6 +77,21 @@ export const login = async (req, res) => {
       });
     }
 
+    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
+      expiresIn: "1d",
+    });
+
+    //populate each postId in the post array
+    const populatedPost = await Promise.all(
+      user.posts.map(async (postId)=>{
+        const post = await Post.findById(postId);
+        if(post.author.equals(user._id)){
+          return post;
+        }
+        return null;
+      })
+    )
+
     // creating the user object for return
     user = {
       _id: user._id,
@@ -85,13 +101,11 @@ export const login = async (req, res) => {
       bio: user.bio,
       followers: user.followers,
       following: user.following,
-      post: user.posts,
+      post: populatedPost
     };
 
     // generating the token
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
-      expiresIn: "1d",
-    });
+    
     return res
       .cookie("token", token, {
         httpOnly: true,

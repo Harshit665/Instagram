@@ -1,7 +1,7 @@
 import sharp from "sharp";
 import { Post } from "../models/post.model.js";
-import { User , comment } from "../models/user.model.js";
-
+import { User } from "../models/user.model.js";
+import {Comment} from "../models/comment.model.js"
 
 //adding new post
 export const addNewPost = async (req, res) => {
@@ -117,10 +117,9 @@ export const likes = async (req, res) => {
     //implementing socket.io for real time notification
 
     return res.status(200).json({
-        message:"post liked",
-        sucess:true
+      message: "post liked",
+      sucess: true,
     });
-
   } catch (error) {
     console.log(error);
   }
@@ -141,58 +140,158 @@ export const disLikes = async (req, res) => {
     }
 
     //like logic
-    await post.updateOne({$pull:{disLikes:disLikeKarneWaleUserKiId}});
+    await post.updateOne({ $pull: { disLikes: disLikeKarneWaleUserKiId } });
     await post.save();
 
     //implementing socket.io for real time notification
 
     return res.status(200).json({
-        message:"post disliked",
-        sucess:true
+      message: "post disliked",
+      sucess: true,
     });
-
   } catch (error) {
     console.log(error);
   }
 };
 
 //add comment
-export const addComment = async (req,res) =>{
-    try {
-        const postId = req.params.id;
-        const commentKarneWalaUserKiId = req.id;
-        const {text} = req.body;
-        const post = await Post.findById(postId)// getting post id 
+export const addComment = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const commentKarneWalaUserKiId = req.id;
+    const { text } = req.body;
+    const post = await Post.findById(postId); // getting post id
 
-         if(!text){
-            res.status(400).json({
-                message:"something went wrong -- post controller",
-                success:false
-            })
-         }
-
-         const comment = await comment.create({
-            text,
-            author:commentKarneWalaUserKiId,
-            post:postId
-         }).populate({
-            path:"author",
-            select:"userName , profilePicture"
-         })
-
-         post.comment.push(comment._id);
-         await post.save();
-
-         return res.status(201).json({
-            message:"comment added  --post controller",
-            comment,
-            success:true
-         })
-
-    } catch (error) {
-        console.log(error);
-        
+    if (!text) {
+      res.status(400).json({
+        message: "something went wrong -- post controller",
+        success: false,
+      });
     }
+
+    const comment = await Comment
+      .create({
+        text,
+        author: commentKarneWalaUserKiId,
+        post: postId,
+      })
+      .populate({
+        path: "author",
+        select: "userName , profilePicture",
+      });
+
+    post.comment.push(comment._id);
+    await post.save();
+
+    return res.status(201).json({
+      message: "comment added  --post controller",
+      comment,
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 //post wise get comments of posts
+export const getCommentsOfPosts = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const comments = await Comment
+      .find({ id: postId })
+      .populate("author", "userName", "profilePicture");
+    if (!comments) {
+      return res.status(404).json({
+        message: "no comments found",
+        success: false,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      comments,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//deleting the post
+export const deletePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const authorId = req.id;
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(404).json({
+        message: "post not found --post controller deleting",
+        success: false,
+      });
+    }
+
+    // check is the logged in user is the owner of the post
+    if (post.author.toString() != authorId)
+      return res.status(200).json({
+        message: "Post deleted successfully",
+        success: true,
+      });
+
+    //delete post
+    await Post.findByIdAndDelete(postId);
+
+    //removing the post id from the user post
+    let user = await User.findById(authorId);
+    user.posts = user.posts.filter((id) => id.toString() != postId);
+    await user.save();
+
+    //delete associated comments
+    await Comment.deleteMany({ post: postId });
+
+    return res.status(200).json({
+      message: "post deleted --post controller",
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//book mark of the post
+export const bookMarkPost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const authorId = req.id;
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res.status(200).json({
+        message: "post not found --post controller bookmark",
+        success: false,
+      });
+    }
+    const user = User.findById(authorId);
+    if(user.bookMarks.includes(post._id)){
+      // already bookmark ---> remove from book mark
+      await User.updateOne({$pull:{bookMarks:post._id}});
+      await user.save()
+      return res.status(200).json({
+        type:"unsaved",
+        message: "post removed from bookmarked --post controller bookmark",
+        success: true,
+      });
+    }
+    else{
+      // bookmark krna padega
+      await User.updateOne({$addToSet:{bookMarks:post._id}});
+      await user.save()
+      return res.status(200).json({
+        type:"unsaved",
+        message: "post bookmarked --post controller bookmark",
+        success: true,
+      });
+    }
+
+
+  } catch (error) {
+    console.log(error);
+  }
+};
