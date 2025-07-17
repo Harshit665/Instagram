@@ -12,8 +12,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
+import { useSelector,useDispatch } from "react-redux";
+import { setAuthUser } from "@/redux/authSlice";
 
-const sidebarItems = [
+
+const LeftSideBar = () => {
+     const navigate = useNavigate();
+     const {user} = useSelector(store=>store.auth);
+     const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      const res = await axios.get("http://localhost:8000/api/v1/user/logout", {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        dispatch(setAuthUser(null))
+        navigate("/login");
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+  const sideHandler = (textType) => {
+    if (textType === "logout") {
+      handleLogout();
+    }
+  };
+
+  const sidebarItems = [
   {
     icon: <Home />,
     text: "Home",
@@ -41,7 +69,7 @@ const sidebarItems = [
   {
     icon: (
       <Avatar className="h-6 w-6">
-        <AvatarImage src="https://github.com/shadcn.png" />
+        <AvatarImage src={user?.profilePicture} />
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
     ),
@@ -52,27 +80,6 @@ const sidebarItems = [
     text: "logout",
   },
 ];
-const LeftSideBar = () => {
-     const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    try {
-      const res = await axios.get("http://localhost:8000/api/v1/user/logout", {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        navigate("/login");
-        toast.success(res.data.message);
-      }
-    } catch (error) {
-      toast.error(error.response.data.message);
-    }
-  };
-  const sideHandler = (textType) => {
-    if (textType === "logout") {
-      handleLogout();
-    }
-  };
 
   return (
     <div className="fixed top-0 left-0 z-10 px-4 border-r border-gray-300 w-[16%] h-screen flex flex-col">
