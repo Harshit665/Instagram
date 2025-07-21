@@ -82,15 +82,17 @@ export const login = async (req, res) => {
     });
 
     //populate each postId in the post array
-    const populatedPost = await Promise.all(
-      user.posts.map(async (postId)=>{
-        const post = await Post.findById(postId);
-        if(post.author.equals(user._id)){
-          return post;
-        }
-        return null;
-      })
-    )
+   const populatedPost = await Promise.all(
+  user.posts.map(async (postId) => {
+    const post = await Post.findById(postId);
+    if (!post) return null; // Skip if post is not found
+    if (post.author && post.author.equals(user._id)) {
+      return post;
+    }
+    return null;
+  })
+);
+
 
     // creating the user object for return
     user = {

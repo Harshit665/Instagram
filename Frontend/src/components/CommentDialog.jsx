@@ -54,7 +54,7 @@ const CommentDialog = ({ open, setOpen }) => {
             </div>
             <div>
               <Dialog>
-                <DialogTrigger aschild>
+                <DialogTrigger asChild>
                   <MoreHorizontal className="mt-2 cursor-pointer" />
                 </DialogTrigger>
                 <DialogContent>

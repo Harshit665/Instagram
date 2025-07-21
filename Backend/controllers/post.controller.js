@@ -2,6 +2,7 @@ import sharp from "sharp";
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
 import {Comment} from "../models/comment.model.js"
+import cloudinary from "cloudinary";
 
 //adding new post
 export const addNewPost = async (req, res) => {
@@ -23,7 +24,7 @@ export const addNewPost = async (req, res) => {
       .toBuffer();
 
     // convering the image to url
-    fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString(
+    const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString(
       "base64"
     )}`;
     const cloudResponse = await cloudinary.uploader.upload(fileUri);
@@ -33,7 +34,7 @@ export const addNewPost = async (req, res) => {
       author: authorId,
     });
 
-    const user = User.findById(authorId);
+    const user = await User.findById(authorId);
 
     if (user) {
       user.posts.push(post._id), await user.save();
@@ -56,11 +57,11 @@ export const getAllPosts = async (req, res) => {
   try {
     const posts = await Post.find()
       .sort({ createdAt: -1 })
-      .populate({ path: "author", select: "userName, profilePicture" })
+      .populate({ path: "author", select: "userName profilePicture" })
       .populate({
         path: "comments",
         sort: { createdAt: -1 },
-        populate: { path: "author", select: "userName, profilePicture" },
+        populate: { path: "author", select: "userName profilePicture" },
       });
     return res.status(200).json({
       posts,
@@ -79,7 +80,7 @@ export const getUserPost = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate({
         path: "author",
-        select: "userName , profilePicture",
+        select: "userName  profilePicture",
       })
       .populate({
         path: "comments",
@@ -111,7 +112,7 @@ export const likes = async (req, res) => {
     }
 
     //like logic
-    await post.updateOne({ $adToSet: { likes: likeKarneWaleUserKiId } });
+    await post.updateOne({ $addToSet: { likes: likeKarneWaleUserKiId } });
     await post.save();
 
     //implementing socket.io for real time notification
@@ -163,7 +164,7 @@ export const addComment = async (req, res) => {
     const post = await Post.findById(postId); // getting post id
 
     if (!text) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "something went wrong -- post controller",
         success: false,
       });
@@ -177,7 +178,7 @@ export const addComment = async (req, res) => {
       })
       .populate({
         path: "author",
-        select: "userName , profilePicture",
+        select: "userName  profilePicture",
       });
 
     post.comment.push(comment._id);

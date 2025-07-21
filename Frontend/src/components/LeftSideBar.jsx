@@ -7,19 +7,21 @@ import {
   Search,
   TrendingUp,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import axios from "axios";
 import { useSelector,useDispatch } from "react-redux";
 import { setAuthUser } from "@/redux/authSlice";
+import Createpost from "./CreatePost";
 
 
 const LeftSideBar = () => {
      const navigate = useNavigate();
      const {user} = useSelector(store=>store.auth);
      const dispatch = useDispatch();
+     const [open,setOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -35,12 +37,17 @@ const LeftSideBar = () => {
       toast.error(error.response.data.message);
     }
   };
+
   const sideHandler = (textType) => {
     if (textType === "logout") {
       handleLogout();
     }
+    else if(textType === "Create"){
+     setOpen(true);
+    }
   };
 
+ 
   const sidebarItems = [
   {
     icon: <Home />,
@@ -98,6 +105,7 @@ const LeftSideBar = () => {
           );
         })}
       </div>
+      <Createpost open={open} setOpen={setOpen} />
     </div>
   );
 };
