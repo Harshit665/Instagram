@@ -119,7 +119,7 @@ export const likes = async (req, res) => {
 
     return res.status(200).json({
       message: "post liked",
-      sucess: true,
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -141,14 +141,14 @@ export const disLikes = async (req, res) => {
     }
 
     //like logic
-    await post.updateOne({ $pull: { disLikes: disLikeKarneWaleUserKiId } });
+    await post.updateOne({ $pull: { likes: disLikeKarneWaleUserKiId } });
     await post.save();
 
     //implementing socket.io for real time notification
 
     return res.status(200).json({
       message: "post disliked",
-      sucess: true,
+      success: true,
     });
   } catch (error) {
     console.log(error);
@@ -175,13 +175,14 @@ export const addComment = async (req, res) => {
         text,
         author: commentKarneWalaUserKiId,
         post: postId,
-      })
-      .populate({
+      });
+      
+      await comment.populate({
         path: "author",
-        select: "userName  profilePicture",
+        select: "userName profilePicture",
       });
 
-    post.comment.push(comment._id);
+    post.comments.push(comment._id);
     await post.save();
 
     return res.status(201).json({
@@ -199,7 +200,7 @@ export const getCommentsOfPosts = async (req, res) => {
   try {
     const postId = req.params.id;
     const comments = await Comment
-      .find({ id: postId })
+      .find({ post: postId })
       .populate("author", "userName", "profilePicture");
     if (!comments) {
       return res.status(404).json({
@@ -269,13 +270,13 @@ export const bookMarkPost = async (req, res) => {
         success: false,
       });
     }
-    const user = User.findById(authorId);
+    const user = await User.findById(authorId);
     if(user.bookMarks.includes(post._id)){
       // already bookmark ---> remove from book mark
       await User.updateOne({$pull:{bookMarks:post._id}});
       await user.save()
       return res.status(200).json({
-        type:"unsaved",
+        type:"saved",
         message: "post removed from bookmarked --post controller bookmark",
         success: true,
       });
