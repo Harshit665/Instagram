@@ -126,7 +126,7 @@ const Posts = ({ post }) => {
         <div className="flex items-center gap-2">
           <Avatar>
             <AvatarImage src={post.author?.profilePicture} alt="Post_image" />
-            <AvatarFallback>CN</AvatarFallback>
+            <AvatarFallback className="bg-gray-400 rounded-full p-1.5 text-sm">CN</AvatarFallback>
           </Avatar>
           <div className="flex gap-2">
             <h1>{post.author?.userName}</h1>

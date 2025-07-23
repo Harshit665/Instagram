@@ -106,8 +106,7 @@ export const login = async (req, res) => {
       post: populatedPost
     };
 
-    // generating the token
-    
+    // generating the token   
     return res
       .cookie("token", token, {
         httpOnly: true,

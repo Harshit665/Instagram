@@ -24,6 +24,7 @@ const LeftSideBar = () => {
      const dispatch = useDispatch();
      const [open,setOpen] = useState(false);
 
+
   const handleLogout = async () => {
     try {
       const res = await axios.get("http://localhost:8000/api/v1/user/logout", {
@@ -47,6 +48,9 @@ const LeftSideBar = () => {
     }
     else if(textType === "Create"){
      setOpen(true);
+    }
+    else if(textType === "Profile"){
+      navigate(`/profile/${user?._id}`)
     }
   };
 
@@ -83,7 +87,7 @@ const LeftSideBar = () => {
         <AvatarFallback>CN</AvatarFallback>
       </Avatar>
     ),
-    text: "profile",
+    text: "Profile",
   },
   {
     icon: <LogOut />,
