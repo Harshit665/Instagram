@@ -1,2 +1,12 @@
+@keyframes border-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-border-spin {
+  background-size: 300% 300%;
+  animation: border-spin 6s linear infinite;
+}
+
 @import "tailwindcss";
 @import "tw-animate-css"
