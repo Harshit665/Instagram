@@ -60,7 +60,7 @@ export const login = async (req, res) => {
     let user = await User.findOne({ email });
     if (!user) {
       return (
-        res.status(401),
+        res.status(401).
         json({
           message: "invalid credentials -user.controller.js",
           success: false,
