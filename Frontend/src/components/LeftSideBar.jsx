@@ -56,7 +56,7 @@ const LeftSideBar = () => {
     } else if (value === "explore") {
       toast.message("Explore coming soon!");
     } else if (value === "messages") {
-      toast.message("Messages coming soon!");
+      navigate("/chat");
     } else if (value === "notifications") {
       toast.message("Notifications coming soon!");
     }
