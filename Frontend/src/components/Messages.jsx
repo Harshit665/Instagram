@@ -2,8 +2,14 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useGetAllMessage from "@/hooks/useGetAllMessage";
 
 const Messages = ({ selectedUser }) => {
+  useGetAllMessage();
+  const {Messages} = useSelector((store) => store.chat);
+
+
   return (
     <div className=" flex-1 p-4 overflow-y-auto">
       <div className="flex flex-col items-center min-w-[250px]">
@@ -24,7 +30,8 @@ const Messages = ({ selectedUser }) => {
         </Link>
       </div>
       <div className="flex flex-col gap-3">
-        {[1, 2, 3, 4].map((msg) => {
+        {
+        Messages && Messages.map((msg) => {
           return (
             <div key={msg} className={`flex`}>
               <div>

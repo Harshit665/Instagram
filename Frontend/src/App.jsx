@@ -74,7 +74,7 @@ function App() {
         socket.close();
         dispatch(setSocket(null)); 
     }
-  },[user,dispatch,socket]);
+  },[user,dispatch]);
   return (
     <>
       <RouterProvider router={router} />

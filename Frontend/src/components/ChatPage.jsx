@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { setSelectedUser } from "@/redux/authSlice";
+import { setMessages } from "@/redux/chatSlice";
 import { Button } from "./ui/button";
 import { MessageCircleCode, Send, Search, MessageCircle } from "lucide-react";
 import Messages from "./Messages";
@@ -37,9 +38,14 @@ const ChatPage = () => {
       }
     } catch (error) {
       console.log(error);
-      
     }
   }
+
+  useEffect(()=>{
+    return() =>{
+      dispatch(setSelectedUser(null)); // Clear selected user on unmount
+    }
+  },[])
 
   return (
     <div className="flex ml-[20%] h-screen bg-gray-50">

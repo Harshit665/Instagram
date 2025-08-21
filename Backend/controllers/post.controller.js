@@ -160,7 +160,7 @@ export const disLikes = async (req, res) => {
     await post.save();
 
     //implementing socket.io for real time notification
-    const user = await User.findById(likeKarneWaleUserKiId).select("profilePicture userName");
+    const user = await User.findById(disLikeKarneWaleUserKiId).select("profilePicture userName");
     const postOwnerId =  post.author.toString();
     if(postOwnerId != disLikeKarneWaleUserKiId){
       //emit a notification event of like 
