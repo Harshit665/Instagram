@@ -59,13 +59,10 @@ export const login = async (req, res) => {
     //checking whether exists or not
     let user = await User.findOne({ email });
     if (!user) {
-      return (
-        res.status(401).
-        json({
-          message: "invalid credentials -user.controller.js",
-          success: false,
-        })
-      );
+      return res.status(401).json({
+        message: "invalid credentials -user.controller.js",
+        success: false,
+      });
     }
 
     // checking the passowrd correctness
@@ -77,22 +74,22 @@ export const login = async (req, res) => {
       });
     }
 
+    // generating token  
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
 
     //populate each postId in the post array
-   const populatedPost = await Promise.all(
-  user.posts.map(async (postId) => {
-    const post = await Post.findById(postId);
-    if (!post) return null; // Skip if post is not found
-    if (post.author && post.author.equals(user._id)) {
-      return post;
-    }
-    return null;
-  })
-);
-
+    const populatedPost = await Promise.all(
+      user.posts.map(async (postId) => {
+        const post = await Post.findById(postId);
+        if (!post) return null; // Skip if post is not found
+        if (post.author && post.author.equals(user._id)) {
+          return post;
+        }
+        return null;
+      })
+    );
 
     // creating the user object for return
     user = {
@@ -103,10 +100,10 @@ export const login = async (req, res) => {
       bio: user.bio,
       followers: user.followers,
       following: user.following,
-      post: populatedPost
+      post: populatedPost,
     };
 
-    // generating the token   
+    // generating the token
     return res
       .cookie("token", token, {
         httpOnly: true,
@@ -140,7 +137,9 @@ export const getProfile = async (req, res) => {
   try {
     const userID = req.params.id;
 
-    let user = await User.findById(userID).populate({path:"posts",createdAt:-1}).populate("bookMarks");
+    let user = await User.findById(userID)
+      .populate({ path: "posts", createdAt: -1 })
+      .populate("bookMarks");
     return res.status(200).json({
       user,
       success: true,
@@ -193,7 +192,7 @@ export const editProfile = async (req, res) => {
 };
 
 //suggested users
-export const getSuggestedUser = async (req,res) => {
+export const getSuggestedUser = async (req, res) => {
   try {
     const getSuggestedUser = await User.find({ _id: { $ne: req.id } }).select(
       "-passWord"
