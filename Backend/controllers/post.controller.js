@@ -141,7 +141,7 @@ export const likes = async (req, res) => {
   }
 };
 
-//dislike the posts
+//dilike the posts
 export const disLikes = async (req, res) => {
   try {
     const disLikeKarneWaleUserKiId = req.id;
