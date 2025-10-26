@@ -1,3 +1,5 @@
+/* This code snippet is a React component for a login form. Here's a breakdown of what it does: */
+/* This code snippet is a React component for a login form. Here's a breakdown of what it does: */
 import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
