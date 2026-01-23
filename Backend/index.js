@@ -11,12 +11,14 @@ import { app , server } from "./socket/socket.js";
 
 dotenv.config({});
 
-app.get("", (req, res) => {
-  res.status(200).json({
-    message: "i am coming from backend",
-    success: true,
-  });
-});
+// below code is to test the setup 
+
+// app.get("", (req, res) => {
+//   res.status(200).json({
+//     message: "i am coming from backend",
+//     success: true,
+//   });
+// });
 
 //middlewares
 app.use(express.json());
